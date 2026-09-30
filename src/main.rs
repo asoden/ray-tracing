@@ -5,6 +5,7 @@ use crate::common::{random_double, random_double_range};
 use crate::hittable::Hittable;
 use crate::hittable_list::HittableList;
 use crate::material::Material;
+use crate::quad::Quad;
 use crate::sphere::MovingSphere;
 use crate::texture::Texture;
 use crate::texture::noise::{Noise, NoiseType};
@@ -256,22 +257,199 @@ fn perlin_shperes(noise_type: NoiseType) -> Box<dyn Hittable> {
     Box::new(world)
 }
 
+#[allow(dead_code)]
+fn quads() -> Box<dyn Hittable> {
+    let mut world = HittableList::default();
+
+    let left = Material::Metal {
+        albedo: Color::new(1.0, 0.2, 0.2),
+        fuzz: 0.0,
+    };
+    let back = Material::Lambertian {
+        albedo: Texture::image("assets/jeren.png"),
+    };
+    let right = Material::Metal {
+        albedo: Color::new(0.2, 0.2, 1.0),
+        fuzz: 0.0,
+    };
+    let upper = Material::Metal {
+        albedo: Color::new(1.0, 0.5, 0.0),
+        fuzz: 0.0,
+    };
+    let lower = Material::Metal {
+        albedo: Color::new(0.2, 0.8, 0.8),
+        fuzz: 0.0,
+    };
+
+    world.add(Box::new(Quad::new(
+        Point::new(-3.0, -2.0, 5.0),
+        Vec3::new(0.0, 0.0, -4.0),
+        Vec3::new(0.0, 4.0, 0.0),
+        left,
+    )));
+    world.add(Box::new(Quad::new(
+        Point::new(-2.0, -2.0, 0.0),
+        Vec3::new(4.0, 0.0, 0.0),
+        Vec3::new(0.0, 4.0, 0.0),
+        back,
+    )));
+    world.add(Box::new(Quad::new(
+        Point::new(3.0, -2.0, 1.0),
+        Vec3::new(0.0, 0.0, 4.0),
+        Vec3::new(0.0, 4.0, 0.0),
+        right,
+    )));
+    world.add(Box::new(Quad::new(
+        Point::new(-2.0, 3.0, 1.0),
+        Vec3::new(4.0, 0.0, 0.0),
+        Vec3::new(0.0, 0.0, 4.0),
+        upper,
+    )));
+    world.add(Box::new(Quad::new(
+        Point::new(-2.0, -3.0, 5.0),
+        Vec3::new(4.0, 0.0, 0.0),
+        Vec3::new(0.0, 0.0, -4.0),
+        lower,
+    )));
+
+    Box::new(world)
+}
+
+#[allow(dead_code)]
+fn simple_light() -> Box<dyn Hittable> {
+    let mut world = HittableList::default();
+
+    let perlin_texture = Material::Lambertian {
+        albedo: Texture::Noise(Noise {
+            noise_gen: Perlin::new(),
+            scale: 4.0,
+            noise_type: NoiseType::Turbulence,
+        }),
+    };
+
+    world.add(Box::new(Sphere::new(
+        Vec3::new(0.0, -1000.0, 0.0),
+        1000.0,
+        perlin_texture.clone(),
+    )));
+    world.add(Box::new(Sphere::new(
+        Vec3::new(0.0, 2.0, 0.0),
+        2.0,
+        perlin_texture,
+    )));
+
+    let diff_light = Material::DiffuseLight {
+        emitter: Texture::Constant {
+            color: Color::new(1.0, 1.0, 1.0),
+        },
+        intensity: 4.0,
+    };
+
+    world.add(Box::new(Sphere::new(
+        Vec3::new(0.0, 7.0, 0.0),
+        2.0,
+        diff_light.clone(),
+    )));
+
+    world.add(Box::new(Quad::new(
+        Point::new(3.0, 1.0, -2.0),
+        Vec3::new(2.0, 0.0, 0.0),
+        Vec3::new(0.0, 2.0, 0.0),
+        diff_light,
+    )));
+
+    Box::new(world)
+}
+
+#[allow(dead_code)]
+fn cornell_box() -> Box<dyn Hittable> {
+    let mut world = HittableList::default();
+
+    let red = Material::Lambertian {
+        albedo: Texture::Constant {
+            color: Color::new(0.65, 0.05, 0.05),
+        },
+    };
+    let white = Material::Lambertian {
+        albedo: Texture::Constant {
+            color: Color::new(0.73, 0.73, 0.73),
+        },
+    };
+    let green = Material::Lambertian {
+        albedo: Texture::Constant {
+            color: Color::new(0.12, 0.45, 0.15),
+        },
+    };
+    let light = Material::DiffuseLight {
+        emitter: Texture::Constant {
+            color: Color::new(1.0, 1.0, 1.0),
+        },
+        intensity: 15.0,
+    };
+
+    world.add(Box::new(Quad::new(
+        Point::new(555.0, 0.0, 0.0),
+        Vec3::new(0.0, 555.0, 0.0),
+        Vec3::new(0.0, 0.0, 555.0),
+        green,
+    )));
+
+    world.add(Box::new(Quad::new(
+        Point::new(0.0, 0.0, 0.0),
+        Vec3::new(0.0, 555.0, 0.0),
+        Vec3::new(0.0, 0.0, 555.0),
+        red,
+    )));
+
+    world.add(Box::new(Quad::new(
+        Point::new(343.0, 554.0, 332.0),
+        Vec3::new(-130.0, 0.0, 0.0),
+        Vec3::new(0.0, 0.0, -105.0),
+        light,
+    )));
+
+    world.add(Box::new(Quad::new(
+        Point::new(0.0, 0.0, 0.0),
+        Vec3::new(555.0, 0.0, 0.0),
+        Vec3::new(0.0, 0.0, 555.0),
+        white.clone(),
+    )));
+
+    world.add(Box::new(Quad::new(
+        Point::new(555.0, 555.0, 555.0),
+        Vec3::new(-555.0, 0.0, 0.0),
+        Vec3::new(0.0, 0.0, -555.0),
+        white.clone(),
+    )));
+
+    world.add(Box::new(Quad::new(
+        Point::new(0.0, 0.0, 555.0),
+        Vec3::new(555.0, 0.0, 0.0),
+        Vec3::new(0.0, 555.0, 0.0),
+        white.clone(),
+    )));
+
+    Box::new(world)
+}
+
 fn main() {
     let mut out = stdout().lock();
 
     // let R = f64::cos(PI / 4.0);
-    let aspect_ratio = 16.0 / 9.0;
-    let image_width = 1200;
-    let samples = 500;
+    // let aspect_ratio = 16.0 / 9.0;
+    let aspect_ratio = 1.0;
+    let image_width = 600;
+    let samples = 200;
     let max_depth = 50;
-    let vfov = 20.0;
-    let look_from = Point::new(13.0, 2.0, 3.0);
-    let look_at = Point::new(0.0, 0.0, 0.0);
+    let vfov = 40.0;
+    let look_from = Point::new(278.0, 278.0, -800.0);
+    let look_at = Point::new(278.0, 278.0, 0.0);
     let vup = Vec3::new(0.0, 1.0, 0.0);
     let defocus_angle = 0.;
     let focus_dist = 10.0;
+    let background = Color::new(0.0, 0.0, 0.0);
 
-    let world = perlin_shperes(NoiseType::Turbulence);
+    let world = cornell_box();
 
     let mut cam = Camera::new(
         aspect_ratio,
@@ -284,6 +462,7 @@ fn main() {
         vup,
         defocus_angle,
         focus_dist,
+        background,
     );
 
     cam.render(&mut out, world);

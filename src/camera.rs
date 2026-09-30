@@ -30,6 +30,8 @@ pub struct Camera {
     pub defocus_angle: f64,
     /// Distance from camera `look_from` point to plane of perfect focus
     pub focus_dist: f64,
+    /// Scene background color
+    pub background: Color,
     /// Rendered image height
     image_height: i32,
     /// Color scale factor for a sum of pixel samples
@@ -62,6 +64,7 @@ impl Camera {
             Vec3::new(0., 1., 0.),
             0.0,
             10.0,
+            Color::new(0.0, 0.0, 0.0),
         )
     }
 
@@ -76,6 +79,7 @@ impl Camera {
         vup: Vec3,
         defocus_angle: f64,
         focus_dist: f64,
+        background: Color,
     ) -> Self {
         Self {
             aspect_ratio,
@@ -88,6 +92,7 @@ impl Camera {
             vup,
             defocus_angle,
             focus_dist,
+            background,
             ..Default::default()
         }
     }
@@ -162,17 +167,23 @@ impl Camera {
             return Color::new(0., 0., 0.);
         }
 
-        if let Some(hit_record) = world.hit(ray, 0.001, f64::INFINITY) {
-            if let Some(scattered_rec) = hit_record.material.scatter(ray, &hit_record) {
-                return scattered_rec.attenuation
-                    * self.ray_color(&scattered_rec.scattered, depth - 1, world);
+        match world.hit(ray, 0.001, f64::INFINITY) {
+            Some(hit_record) => {
+                let emitted_color =
+                    hit_record
+                        .material
+                        .emitted(hit_record.u, hit_record.v, &hit_record.p);
+                match hit_record.material.scatter(ray, &hit_record) {
+                    Some(scatter_rec) => {
+                        let scatter_color = scatter_rec.attenuation
+                            * self.ray_color(&scatter_rec.scattered, depth - 1, world);
+                        emitted_color + scatter_color
+                    }
+                    None => emitted_color,
+                }
             }
-            return Color::new(0., 0., 0.);
+            None => self.background,
         }
-
-        let unit_direction = ray.direction.to_unit();
-        let a = 0.5 * (unit_direction.y + 1.0);
-        (1.0 - a) * Color::new(1.0, 1.0, 1.0) + a * Color::new(0.5, 0.7, 1.0)
     }
 
     fn get_ray(&self, i: i32, j: i32) -> Ray {

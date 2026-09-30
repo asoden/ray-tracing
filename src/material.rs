@@ -3,7 +3,7 @@ use crate::{
     hittable::HitRecord,
     ray::Ray,
     texture::Texture,
-    vec3::{Color, Vec3},
+    vec3::{Color, Point, Vec3},
 };
 
 pub struct ScatterRecord {
@@ -16,6 +16,7 @@ pub enum Material {
     Lambertian { albedo: Texture },
     Metal { albedo: Color, fuzz: f64 },
     Dielectric { refraction_index: f64 },
+    DiffuseLight { emitter: Texture, intensity: f64 },
 }
 
 impl Material {
@@ -75,6 +76,14 @@ impl Material {
                     scattered: Ray::new(rec.p, direction, r_in.time),
                 })
             }
+            Material::DiffuseLight { .. } => None,
+        }
+    }
+
+    pub fn emitted(&self, u: f64, v: f64, point: &Point) -> Color {
+        match self {
+            Self::DiffuseLight { emitter, intensity } => *intensity * emitter.value(u, v, point),
+            _ => Color::default(),
         }
     }
 }
