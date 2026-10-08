@@ -35,4 +35,18 @@ impl Aabb {
         let end = interval.end.min(t1.reduce(f64::min));
         end > start
     }
+
+    pub fn corners<'s>(&'s self) -> impl Iterator<Item = Vec3> + 's {
+        (0..2).flat_map(move |x| {
+            (0..2).flat_map(move |y| {
+                (0..2).map(move |z| {
+                    Vec3::new(
+                        if x == 0 { self.min.x } else { self.max.x },
+                        if y == 0 { self.min.y } else { self.max.y },
+                        if z == 0 { self.min.z } else { self.max.z },
+                    )
+                })
+            })
+        })
+    }
 }

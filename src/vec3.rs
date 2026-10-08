@@ -67,6 +67,15 @@ impl Vec3 {
     }
 
     #[inline]
+    pub fn zip_with(self, other: Vec3, mut f: impl FnMut(f64, f64) -> f64) -> Self {
+        Vec3 {
+            x: f(self.x, other.x),
+            y: f(self.y, other.y),
+            z: f(self.z, other.z),
+        }
+    }
+
+    #[inline]
     pub fn zip_with3(
         self,
         other1: Vec3,

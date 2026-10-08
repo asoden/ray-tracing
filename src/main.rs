@@ -2,14 +2,17 @@ use std::io::stdout;
 
 use crate::bvh::Bvh;
 use crate::common::{random_double, random_double_range};
+use crate::cube::Cube;
 use crate::hittable::Hittable;
 use crate::hittable_list::HittableList;
 use crate::material::Material;
 use crate::quad::Quad;
+use crate::rotate::rotate_y;
 use crate::sphere::MovingSphere;
 use crate::texture::Texture;
 use crate::texture::noise::{Noise, NoiseType};
 use crate::texture::perlin::Perlin;
+use crate::translate::Translate;
 use crate::vec3::Vec3;
 use crate::{
     camera::Camera,
@@ -21,13 +24,16 @@ mod aabb;
 mod bvh;
 mod camera;
 mod common;
+mod cube;
 mod hittable;
 mod hittable_list;
 mod material;
 mod quad;
 mod ray;
+mod rotate;
 mod sphere;
 mod texture;
+mod translate;
 mod vec3;
 
 #[allow(dead_code)]
@@ -429,6 +435,28 @@ fn cornell_box() -> Box<dyn Hittable> {
         white.clone(),
     )));
 
+    let cube = Cube::new(
+        Point::new(0.0, 0.0, 0.0),
+        Point::new(165.0, 330.0, 165.0),
+        white.clone(),
+    );
+    let cube = Translate {
+        offset: Vec3::new(265.0, 0.0, 295.0),
+        shape: rotate_y(15.0, cube),
+    };
+    world.add(Box::new(cube));
+
+    let cube = Cube::new(
+        Point::new(0.0, 0.0, 0.0),
+        Point::new(165.0, 165.0, 165.0),
+        white.clone(),
+    );
+    let cube = Translate {
+        offset: Vec3::new(130.0, 0.0, 65.0),
+        shape: rotate_y(-18.0, cube),
+    };
+    world.add(Box::new(cube));
+
     Box::new(world)
 }
 
@@ -439,7 +467,7 @@ fn main() {
     // let aspect_ratio = 16.0 / 9.0;
     let aspect_ratio = 1.0;
     let image_width = 600;
-    let samples = 200;
+    let samples = 10000;
     let max_depth = 50;
     let vfov = 40.0;
     let look_from = Point::new(278.0, 278.0, -800.0);
