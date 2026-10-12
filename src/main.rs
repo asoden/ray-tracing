@@ -541,8 +541,8 @@ fn cornell_smoke() -> Box<dyn Hittable> {
     };
     let cube = Volume {
         boundary: cube,
-        material: Material::Lambertian {
-            albedo: Texture::Constant {
+        material: Material::Isotropic {
+            tex: Texture::Constant {
                 color: Color::new(0.0, 0.0, 0.0),
             },
         },
@@ -561,8 +561,8 @@ fn cornell_smoke() -> Box<dyn Hittable> {
     };
     let cube = Volume {
         boundary: cube,
-        material: Material::Lambertian {
-            albedo: Texture::Constant {
+        material: Material::Isotropic {
+            tex: Texture::Constant {
                 color: Color::new(1.0, 1.0, 1.0),
             },
         },
