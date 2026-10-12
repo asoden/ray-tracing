@@ -17,6 +17,7 @@ pub enum Material {
     Metal { albedo: Color, fuzz: f64 },
     Dielectric { refraction_index: f64 },
     DiffuseLight { emitter: Texture, intensity: f64 },
+    Isotropic { tex: Texture },
 }
 
 impl Material {
@@ -77,6 +78,14 @@ impl Material {
                 })
             }
             Material::DiffuseLight { .. } => None,
+            Material::Isotropic { tex } => {
+                let scattered = Ray::new(rec.p, Vec3::random_unit_vector(), r_in.time);
+                let attenuation = tex.value(rec.u, rec.v, &rec.p);
+                Some(ScatterRecord {
+                    attenuation,
+                    scattered,
+                })
+            }
         }
     }
 

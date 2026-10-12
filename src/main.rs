@@ -14,6 +14,7 @@ use crate::texture::noise::{Noise, NoiseType};
 use crate::texture::perlin::Perlin;
 use crate::translate::Translate;
 use crate::vec3::Vec3;
+use crate::volume::Volume;
 use crate::{
     camera::Camera,
     sphere::Sphere,
@@ -35,6 +36,7 @@ mod sphere;
 mod texture;
 mod translate;
 mod vec3;
+mod volume;
 
 #[allow(dead_code)]
 fn random_balls() -> Box<dyn Hittable> {
@@ -460,6 +462,117 @@ fn cornell_box() -> Box<dyn Hittable> {
     Box::new(world)
 }
 
+#[allow(dead_code)]
+fn cornell_smoke() -> Box<dyn Hittable> {
+    let mut world = HittableList::default();
+
+    let red = Material::Lambertian {
+        albedo: Texture::Constant {
+            color: Color::new(0.65, 0.05, 0.05),
+        },
+    };
+    let white = Material::Lambertian {
+        albedo: Texture::Constant {
+            color: Color::new(0.73, 0.73, 0.73),
+        },
+    };
+    let green = Material::Lambertian {
+        albedo: Texture::Constant {
+            color: Color::new(0.12, 0.45, 0.15),
+        },
+    };
+    let light = Material::DiffuseLight {
+        emitter: Texture::Constant {
+            color: Color::new(1.0, 1.0, 1.0),
+        },
+        intensity: 7.0,
+    };
+
+    world.add(Box::new(Quad::new(
+        Point::new(555.0, 0.0, 0.0),
+        Vec3::new(0.0, 555.0, 0.0),
+        Vec3::new(0.0, 0.0, 555.0),
+        green,
+    )));
+
+    world.add(Box::new(Quad::new(
+        Point::new(0.0, 0.0, 0.0),
+        Vec3::new(0.0, 555.0, 0.0),
+        Vec3::new(0.0, 0.0, 555.0),
+        red,
+    )));
+
+    world.add(Box::new(Quad::new(
+        Point::new(113.0, 554.0, 127.0),
+        Vec3::new(330.0, 0.0, 0.0),
+        Vec3::new(0.0, 0.0, 305.0),
+        light,
+    )));
+
+    world.add(Box::new(Quad::new(
+        Point::new(0.0, 0.0, 0.0),
+        Vec3::new(555.0, 0.0, 0.0),
+        Vec3::new(0.0, 0.0, 555.0),
+        white.clone(),
+    )));
+
+    world.add(Box::new(Quad::new(
+        Point::new(0.0, 555.0, 0.0),
+        Vec3::new(555.0, 0.0, 0.0),
+        Vec3::new(0.0, 0.0, 555.0),
+        white.clone(),
+    )));
+
+    world.add(Box::new(Quad::new(
+        Point::new(0.0, 0.0, 555.0),
+        Vec3::new(555.0, 0.0, 0.0),
+        Vec3::new(0.0, 555.0, 0.0),
+        white.clone(),
+    )));
+
+    let cube = Cube::new(
+        Point::new(0.0, 0.0, 0.0),
+        Point::new(165.0, 330.0, 165.0),
+        white.clone(),
+    );
+    let cube = Translate {
+        offset: Vec3::new(265.0, 0.0, 295.0),
+        shape: rotate_y(15.0, cube),
+    };
+    let cube = Volume {
+        boundary: cube,
+        material: Material::Lambertian {
+            albedo: Texture::Constant {
+                color: Color::new(0.0, 0.0, 0.0),
+            },
+        },
+        density: 0.01,
+    };
+    world.add(Box::new(cube));
+
+    let cube = Cube::new(
+        Point::new(0.0, 0.0, 0.0),
+        Point::new(165.0, 165.0, 165.0),
+        white.clone(),
+    );
+    let cube = Translate {
+        offset: Vec3::new(130.0, 0.0, 65.0),
+        shape: rotate_y(-18.0, cube),
+    };
+    let cube = Volume {
+        boundary: cube,
+        material: Material::Lambertian {
+            albedo: Texture::Constant {
+                color: Color::new(1.0, 1.0, 1.0),
+            },
+        },
+        density: 0.01,
+    };
+    world.add(Box::new(cube));
+
+    Box::new(world)
+}
+
 fn main() {
     let mut out = stdout().lock();
 
@@ -467,7 +580,7 @@ fn main() {
     // let aspect_ratio = 16.0 / 9.0;
     let aspect_ratio = 1.0;
     let image_width = 600;
-    let samples = 10000;
+    let samples = 200;
     let max_depth = 50;
     let vfov = 40.0;
     let look_from = Point::new(278.0, 278.0, -800.0);
@@ -477,7 +590,7 @@ fn main() {
     let focus_dist = 10.0;
     let background = Color::new(0.0, 0.0, 0.0);
 
-    let world = cornell_box();
+    let world = cornell_smoke();
 
     let mut cam = Camera::new(
         aspect_ratio,
