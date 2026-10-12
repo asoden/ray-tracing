@@ -39,7 +39,7 @@ mod vec3;
 mod volume;
 
 #[allow(dead_code)]
-fn random_balls() -> Box<dyn Hittable> {
+fn random_balls() -> (Box<dyn Hittable>, Camera) {
     // World
     let mut world: Vec<Box<dyn Hittable>> = Vec::new();
     let material_ground = Material::Lambertian {
@@ -113,11 +113,37 @@ fn random_balls() -> Box<dyn Hittable> {
         material3,
     )));
 
-    Box::new(Bvh::new(world, 0.0, 1.0))
+    let aspect_ratio = 16.0 / 9.0;
+    let image_width = 400;
+    let samples = 100;
+    let max_depth = 50;
+    let vfov = 20.0;
+    let look_from = Point::new(13.0, 2.0, 3.0);
+    let look_at = Point::new(0.0, 0.0, 0.0);
+    let vup = Vec3::new(0.0, 1.0, 0.0);
+    let defocus_angle = 0.6;
+    let focus_dist = 10.0;
+    let background = Color::new(0.70, 0.80, 1.0);
+
+    let cam = Camera::new(
+        aspect_ratio,
+        image_width,
+        samples,
+        max_depth,
+        vfov,
+        look_from,
+        look_at,
+        vup,
+        defocus_angle,
+        focus_dist,
+        background,
+    );
+
+    (Box::new(Bvh::new(world, 0.0, 1.0)), cam)
 }
 
 #[allow(dead_code)]
-fn random_bouncy_balls() -> Box<dyn Hittable> {
+fn random_bouncy_balls() -> (Box<dyn Hittable>, Camera) {
     // World
     let mut world: Vec<Box<dyn Hittable>> = Vec::new();
     let material_ground = Material::Lambertian {
@@ -201,11 +227,37 @@ fn random_bouncy_balls() -> Box<dyn Hittable> {
         material3,
     )));
 
-    Box::new(Bvh::new(world, 0., 1.))
+    let aspect_ratio = 16.0 / 9.0;
+    let image_width = 400;
+    let samples = 100;
+    let max_depth = 50;
+    let vfov = 20.0;
+    let look_from = Point::new(13.0, 2.0, 3.0);
+    let look_at = Point::new(0.0, 0.0, 0.0);
+    let vup = Vec3::new(0.0, 1.0, 0.0);
+    let defocus_angle = 0.6;
+    let focus_dist = 10.0;
+    let background = Color::new(0.70, 0.80, 1.0);
+
+    let cam = Camera::new(
+        aspect_ratio,
+        image_width,
+        samples,
+        max_depth,
+        vfov,
+        look_from,
+        look_at,
+        vup,
+        defocus_angle,
+        focus_dist,
+        background,
+    );
+
+    (Box::new(Bvh::new(world, 0., 1.)), cam)
 }
 
 #[allow(dead_code)]
-fn checkered_spheres() -> Box<dyn Hittable> {
+fn checkered_spheres() -> (Box<dyn Hittable>, Camera) {
     let mut world = HittableList::default();
     let checkered = Material::Lambertian {
         albedo: Texture::checkered(
@@ -225,11 +277,37 @@ fn checkered_spheres() -> Box<dyn Hittable> {
         checkered,
     )));
 
-    Box::new(world)
+    let aspect_ratio = 16.0 / 9.0;
+    let image_width = 400;
+    let samples = 100;
+    let max_depth = 50;
+    let vfov = 20.0;
+    let look_from = Point::new(13.0, 2.0, 3.0);
+    let look_at = Point::new(0.0, 0.0, 0.0);
+    let vup = Vec3::new(0.0, 1.0, 0.0);
+    let defocus_angle = 0.6;
+    let focus_dist = 10.0;
+    let background = Color::new(0.70, 0.80, 1.0);
+
+    let cam = Camera::new(
+        aspect_ratio,
+        image_width,
+        samples,
+        max_depth,
+        vfov,
+        look_from,
+        look_at,
+        vup,
+        defocus_angle,
+        focus_dist,
+        background,
+    );
+
+    (Box::new(world), cam)
 }
 
 #[allow(dead_code)]
-fn image_sphere() -> Box<dyn Hittable> {
+fn image_sphere() -> (Box<dyn Hittable>, Camera) {
     let mut world = HittableList::default();
     let image = Material::Lambertian {
         albedo: Texture::image("assets/matt.png"),
@@ -237,11 +315,37 @@ fn image_sphere() -> Box<dyn Hittable> {
 
     world.add(Box::new(Sphere::new(Vec3::new(0.0, 1.0, 0.0), 1.0, image)));
 
-    Box::new(world)
+    let aspect_ratio = 16.0 / 9.0;
+    let image_width = 400;
+    let samples = 100;
+    let max_depth = 50;
+    let vfov = 20.0;
+    let look_from = Point::new(0.0, 0.0, 12.0);
+    let look_at = Point::new(0.0, 0.0, 0.0);
+    let vup = Vec3::new(0.0, 1.0, 0.0);
+    let defocus_angle = 0.0;
+    let focus_dist = 10.0;
+    let background = Color::new(0.70, 0.80, 1.0);
+
+    let cam = Camera::new(
+        aspect_ratio,
+        image_width,
+        samples,
+        max_depth,
+        vfov,
+        look_from,
+        look_at,
+        vup,
+        defocus_angle,
+        focus_dist,
+        background,
+    );
+
+    (Box::new(world), cam)
 }
 
 #[allow(dead_code)]
-fn perlin_shperes(noise_type: NoiseType) -> Box<dyn Hittable> {
+fn perlin_shperes(noise_type: NoiseType) -> (Box<dyn Hittable>, Camera) {
     let mut world = HittableList::default();
     let material = Material::Lambertian {
         albedo: Texture::Noise(Noise {
@@ -262,11 +366,37 @@ fn perlin_shperes(noise_type: NoiseType) -> Box<dyn Hittable> {
         material,
     )));
 
-    Box::new(world)
+    let aspect_ratio = 16.0 / 9.0;
+    let image_width = 400;
+    let samples = 100;
+    let max_depth = 50;
+    let vfov = 20.0;
+    let look_from = Point::new(13.0, 2.0, 3.0);
+    let look_at = Point::new(0.0, 0.0, 0.0);
+    let vup = Vec3::new(0.0, 1.0, 0.0);
+    let defocus_angle = 0.0;
+    let focus_dist = 10.0;
+    let background = Color::new(0.70, 0.80, 1.0);
+
+    let cam = Camera::new(
+        aspect_ratio,
+        image_width,
+        samples,
+        max_depth,
+        vfov,
+        look_from,
+        look_at,
+        vup,
+        defocus_angle,
+        focus_dist,
+        background,
+    );
+
+    (Box::new(world), cam)
 }
 
 #[allow(dead_code)]
-fn quads() -> Box<dyn Hittable> {
+fn quads() -> (Box<dyn Hittable>, Camera) {
     let mut world = HittableList::default();
 
     let left = Material::Metal {
@@ -320,11 +450,37 @@ fn quads() -> Box<dyn Hittable> {
         lower,
     )));
 
-    Box::new(world)
+    let aspect_ratio = 1.0;
+    let image_width = 400;
+    let samples = 100;
+    let max_depth = 50;
+    let vfov = 80.0;
+    let look_from = Point::new(0.0, 0.0, 9.0);
+    let look_at = Point::new(0.0, 0.0, 0.0);
+    let vup = Vec3::new(0.0, 1.0, 0.0);
+    let defocus_angle = 0.0;
+    let focus_dist = 10.0;
+    let background = Color::new(0.70, 0.80, 1.0);
+
+    let cam = Camera::new(
+        aspect_ratio,
+        image_width,
+        samples,
+        max_depth,
+        vfov,
+        look_from,
+        look_at,
+        vup,
+        defocus_angle,
+        focus_dist,
+        background,
+    );
+
+    (Box::new(world), cam)
 }
 
 #[allow(dead_code)]
-fn simple_light() -> Box<dyn Hittable> {
+fn simple_light() -> (Box<dyn Hittable>, Camera) {
     let mut world = HittableList::default();
 
     let perlin_texture = Material::Lambertian {
@@ -366,11 +522,37 @@ fn simple_light() -> Box<dyn Hittable> {
         diff_light,
     )));
 
-    Box::new(world)
+    let aspect_ratio = 16.0 / 9.0;
+    let image_width = 400;
+    let samples = 100;
+    let max_depth = 50;
+    let vfov = 20.0;
+    let look_from = Point::new(26.0, 3.0, 6.0);
+    let look_at = Point::new(0.0, 2.0, 0.0);
+    let vup = Vec3::new(0.0, 1.0, 0.0);
+    let defocus_angle = 0.0;
+    let focus_dist = 10.0;
+    let background = Color::new(0.0, 0.0, 0.0);
+
+    let cam = Camera::new(
+        aspect_ratio,
+        image_width,
+        samples,
+        max_depth,
+        vfov,
+        look_from,
+        look_at,
+        vup,
+        defocus_angle,
+        focus_dist,
+        background,
+    );
+
+    (Box::new(world), cam)
 }
 
 #[allow(dead_code)]
-fn cornell_box() -> Box<dyn Hittable> {
+fn cornell_box() -> (Box<dyn Hittable>, Camera) {
     let mut world = HittableList::default();
 
     let red = Material::Lambertian {
@@ -459,11 +641,37 @@ fn cornell_box() -> Box<dyn Hittable> {
     };
     world.add(Box::new(cube));
 
-    Box::new(world)
+    let aspect_ratio = 1.0;
+    let image_width = 600;
+    let samples = 200;
+    let max_depth = 50;
+    let vfov = 40.0;
+    let look_from = Point::new(278.0, 278.0, -800.0);
+    let look_at = Point::new(278.0, 278.0, 0.0);
+    let vup = Vec3::new(0.0, 1.0, 0.0);
+    let defocus_angle = 0.0;
+    let focus_dist = 10.0;
+    let background = Color::new(0.0, 0.0, 0.0);
+
+    let cam = Camera::new(
+        aspect_ratio,
+        image_width,
+        samples,
+        max_depth,
+        vfov,
+        look_from,
+        look_at,
+        vup,
+        defocus_angle,
+        focus_dist,
+        background,
+    );
+
+    (Box::new(world), cam)
 }
 
 #[allow(dead_code)]
-fn cornell_smoke() -> Box<dyn Hittable> {
+fn cornell_smoke() -> (Box<dyn Hittable>, Camera) {
     let mut world = HittableList::default();
 
     let red = Material::Lambertian {
@@ -570,11 +778,37 @@ fn cornell_smoke() -> Box<dyn Hittable> {
     };
     world.add(Box::new(cube));
 
-    Box::new(world)
+    let aspect_ratio = 1.0;
+    let image_width = 600;
+    let samples = 200;
+    let max_depth = 50;
+    let vfov = 40.0;
+    let look_from = Point::new(278.0, 278.0, -800.0);
+    let look_at = Point::new(278.0, 278.0, 0.0);
+    let vup = Vec3::new(0.0, 1.0, 0.0);
+    let defocus_angle = 0.0;
+    let focus_dist = 10.0;
+    let background = Color::new(0.0, 0.0, 0.0);
+
+    let cam = Camera::new(
+        aspect_ratio,
+        image_width,
+        samples,
+        max_depth,
+        vfov,
+        look_from,
+        look_at,
+        vup,
+        defocus_angle,
+        focus_dist,
+        background,
+    );
+
+    (Box::new(world), cam)
 }
 
 #[allow(dead_code)]
-fn final_scene() -> Box<dyn Hittable> {
+fn final_scene() -> (Box<dyn Hittable>, Camera) {
     let mut world: Vec<Box<dyn Hittable>> = Vec::new();
 
     // make ground
@@ -747,14 +981,6 @@ fn final_scene() -> Box<dyn Hittable> {
     };
     world.push(Box::new(translate));
 
-    Box::new(Bvh::new(world, 0.0, 1.0))
-}
-
-fn main() {
-    let mut out = stdout().lock();
-
-    // let R = f64::cos(PI / 4.0);
-    // let aspect_ratio = 16.0 / 9.0;
     let aspect_ratio = 1.0;
     let image_width = 800;
     let samples = 10000;
@@ -767,9 +993,7 @@ fn main() {
     let focus_dist = 10.0;
     let background = Color::new(0.0, 0.0, 0.0);
 
-    let world = final_scene();
-
-    let mut cam = Camera::new(
+    let cam = Camera::new(
         aspect_ratio,
         image_width,
         samples,
@@ -782,6 +1006,14 @@ fn main() {
         focus_dist,
         background,
     );
+
+    (Box::new(Bvh::new(world, 0.0, 1.0)), cam)
+}
+
+fn main() {
+    let mut out = stdout().lock();
+
+    let (world, mut cam) = final_scene();
 
     cam.render(&mut out, world);
 }
