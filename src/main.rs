@@ -656,6 +656,13 @@ fn final_scene() -> Box<dyn Hittable> {
     )));
 
     // blue glass sphere
+    world.push(Box::new(Sphere::new(
+        Point::new(360.0, 150.0, 145.0),
+        70.0,
+        Material::Dielectric {
+            refraction_index: 1.5,
+        },
+    )));
     world.push(Box::new(Volume {
         density: 0.2,
         material: Material::Isotropic {
